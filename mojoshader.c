@@ -8653,7 +8653,7 @@ static ComponentList *componentlist_alloc(Context *ctx)
     ret->v.i = 0;
     ret->next = NULL;
     return ret;
-}
+} // componentlist_alloc
 
 static const char *get_SPIRV_varname_in_buf(Context *ctx, const RegisterType rt,
                                            const int regnum, char *buf,
