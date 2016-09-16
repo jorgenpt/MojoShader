@@ -9141,13 +9141,7 @@ static void emit_SPIRV_start(Context *ctx, const char *profilestr)
     pop_output(ctx);
 
     // also emit the name for the function
-    push_output(ctx, &ctx->globals);
-
-    output_spvop(ctx, SpvOpName, 2 + spv_strlen(ctx->mainfn));
-    output_u32(ctx, ctx->spirv.idmain);
-    output_spvstr(ctx, ctx->mainfn);
-
-    pop_output(ctx);
+    output_spvname(ctx, ctx->spirv.idmain, ctx->mainfn);
 
     set_output(ctx, &ctx->mainline);
 } // emit_SPIRV_start
@@ -9458,6 +9452,7 @@ static void emit_SPIRV_DEF(Context *ctx)
 {
     RegisterList *rl;
     uint32 val0, val1, val2, val3, idv4;
+    char varname[64];
     const float *raw = (const float *) ctx->dwords;
 
     rl = spv_getreg(ctx, ctx->dest_arg.regtype, ctx->dest_arg.regnum);
@@ -9480,12 +9475,16 @@ static void emit_SPIRV_DEF(Context *ctx)
     output_u32(ctx, val2);
     output_u32(ctx, val3);
     pop_output(ctx);
+
+    get_SPIRV_varname_in_buf(ctx, rl->regtype, rl->regnum, varname, sizeof (varname));
+    output_spvname(ctx, rl->spirv.iddecl, varname);
 } // emit_SPIRV_DEF
 
 static void emit_SPIRV_DEFI(Context *ctx)
 {
     RegisterList *rl;
     uint32 val0, val1, val2, val3, idiv4;
+    char varname[64];
     const int *raw = (const float *) ctx->dwords;
 
     rl = spv_getreg(ctx, ctx->dest_arg.regtype, ctx->dest_arg.regnum);
@@ -9508,15 +9507,22 @@ static void emit_SPIRV_DEFI(Context *ctx)
     output_u32(ctx, val2);
     output_u32(ctx, val3);
     pop_output(ctx);
+
+    get_SPIRV_varname_in_buf(ctx, rl->regtype, rl->regnum, varname, sizeof (varname));
+    output_spvname(ctx, rl->spirv.iddecl, varname);
 } // emit_SPIRV_DEFI
 
 static void emit_SPIRV_DEFB(Context *ctx)
 {
     RegisterList *rl;
+    char varname[64];
 
     rl = spv_getreg(ctx, ctx->dest_arg.regtype, ctx->dest_arg.regnum);
     rl->spirv.iddecl = ctx->dwords[0] ? spv_gettrue(ctx) : spv_getfalse(ctx);
     rl->spirv.iduse = rl->spirv.iddecl;
+
+    get_SPIRV_varname_in_buf(ctx, rl->regtype, rl->regnum, varname, sizeof (varname));
+    output_spvname(ctx, rl->spirv.iddecl, varname);
 } // emit_SPIRV_DEFB
 
 EMIT_SPIRV_OPCODE_UNIMPLEMENTED_FUNC(MOV)
